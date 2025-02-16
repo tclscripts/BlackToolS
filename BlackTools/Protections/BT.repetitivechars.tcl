@@ -14,20 +14,27 @@
 ##					                               ##
 #########################################################################
 
-proc repetitivechars:protect {nick host hand chan arg} {
-global black
-if {![validchan $chan]} { return }
-	set handle [nick2hand $nick]
-if {![botisop $chan] && ![setting:get $chan xonly]} { return }
-if {[matchattr $handle $black(exceptflags) $chan]} { return }
-if {[isbotnick $nick]} { return  }
-	set bl_protect [blacktools:protect $nick $chan]
-if {$bl_protect == "1"} { return }
-	set getnum [setting:get $chan repetitivechars-char]
-if {$getnum == ""} { set getnum "$black(repetitivechars:num)" }
-	set pattern [format {([^[:space:]])\1{%d,}} $getnum]
-	if {[regexp $pattern $arg]} {
-	blacktools:banner:1 $nick "repetitivechars" $chan $host [get:banmethod "repetitivechars" $chan] [link:chan:get $chan]
-		return 1
-	}
+namespace eval repetitivechars {
+    variable black
+
+    proc protect {nick host hand chan arg} {
+        variable black
+        if {![validchan $chan]} { return }
+        set handle [nick2hand $nick]
+        if {![botisop $chan] && ![setting:get $chan xonly]} { return }
+        if {[matchattr $handle $black(exceptflags) $chan]} { return }
+        if {[isbotnick $nick]} { return }
+        
+        set bl_protect [blacktools:protect $nick $chan]
+        if {$bl_protect == "1"} { return }
+
+        set getnum [setting:get $chan repetitivechars-char]
+        if {$getnum == ""} { set getnum "$black(repetitivechars:num)" }
+
+        set pattern [format {([^[:space:]])\1{%d,}} $getnum]
+        if {[regexp $pattern $arg]} {
+            blacktools:banner:1 $nick "repetitivechars" $chan $host [get:banmethod "repetitivechars" $chan] [link:chan:get $chan]
+            return 1
+        }
+    }
 }
